@@ -1,9 +1,16 @@
 {
-  "url": "https://github.com/tiddly-gittly/tw-example-plugin",
+  "url": "https://github.com/tiddly-gittly/ical-calendar-importer",
   "tsFiles": [
     "index"
   ],
-  "ignoredExtensionsWhenBuildPlugin": [".ts", ".tsx", ".snap", ".tldr", ".md", ".json"],
+  "ignoredExtensionsWhenBuildPlugin": [
+    ".ts",
+    ".tsx",
+    ".snap",
+    ".tldr",
+    ".md",
+    ".json"
+  ],
   "license": "MIT",
   "version": "0.0.1",
   "types": "",
@@ -20,7 +27,9 @@
     "build:types": "tsc --emitDeclarationOnly",
     "installType": "typesync"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ical.js": "^1.5.0"
+  },
   "devDependencies": {
     "@types/archiver": "5.3.1",
     "@types/eslint": "8.4.10",
