@@ -1,31 +1,54 @@
-import type { Widget as IWidget, IChangedTiddlers } from 'tiddlywiki';
+import type { Widget as IWidget, IChangedTiddlers, IParseTreeNode } from 'tiddlywiki';
 
 const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof IWidget }).widget;
 
-class ExampleWidget extends Widget {
-  // constructor(parseTreeNode: IParseTreeNode, options?: unknown) {
-  //   super(parseTreeNode, options);
-  // }
+class TransformICalWidget extends Widget {
+  icalTiddlerTitle?: string;
 
-  refresh(_changedTiddlers: IChangedTiddlers): boolean {
-    return false;
+  constructor(parseTreeNode: IParseTreeNode, options?: unknown) {
+    super(parseTreeNode, options);
+    this.initialise(parseTreeNode, options);
+  }
+
+  refresh(changedTiddlers: IChangedTiddlers): boolean {
+    const changedAttributes = this.computeAttributes();
+    if ($tw.utils.count(changedAttributes) > 0) {
+      this.refreshSelf();
+      return true;
+    }
+    return this.refreshChildren(changedTiddlers);
   }
 
   /**
    * Lifecycle method: Render this widget into the DOM
    */
-  render(parent: Node, _nextSibling: Node): void {
+  render(parent: Node, nextSibling: Node): void {
     this.parentDomNode = parent;
     this.computeAttributes();
     this.execute();
+    // Render children
+    this.renderChildren(parent, nextSibling);
+  }
 
-    const containerElement = document.createElement('div');
-    this.domNodes.push(containerElement);
-    // eslint-disable-next-line unicorn/prefer-dom-node-append
-    parent.appendChild(containerElement);
+  execute(): void {
+    // DEBUG: console
+    console.log(`this.getAttribute('$icaltitle')`, this.getAttribute('$icaltitle'));
+    this.icalTiddlerTitle = this.getAttribute('$icaltitle');
+    // Construct the child widgets
+    this.makeChildWidgets();
+  }
+
+  invokeAction(triggeringWidget, event): void {
+    // DEBUG: console
+    console.log(`triggeringWidget`, triggeringWidget);
+    // DEBUG: console
+    console.log(`event`, event);
+    // DEBUG: console
+    console.log(`this.icalTiddlerTitle`, this.icalTiddlerTitle);
+    this.refreshChildren();
+    return true; // Action was invoked
   }
 }
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-exports.widget = ExampleWidget;
-exports.ExampleWidget = ExampleWidget;
+exports['action-transformical'] = TransformICalWidget;

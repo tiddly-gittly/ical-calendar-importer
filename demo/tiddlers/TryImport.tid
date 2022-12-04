@@ -1,0 +1,11 @@
+title: TryImport
+type: text/vnd.tiddlywiki
+
+<$button>
+  Import the ExampleShortICal
+  <$action-transformical $icaltitle="ExampleShortICal" />
+</$button>
+
+[[ExampleShortICal]]
+
+<$calendar height="400px" />
