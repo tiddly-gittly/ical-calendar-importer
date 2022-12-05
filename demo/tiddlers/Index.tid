@@ -1,5 +1,6 @@
 title: Index
 type: text/vnd.tiddlywiki
+list: Category Events TryImport WidgetUsage TryImportYourCalendar
 
 {{$:/snippets/minilanguageswitcher}}
 
