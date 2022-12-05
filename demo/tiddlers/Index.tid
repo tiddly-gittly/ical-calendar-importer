@@ -3,6 +3,10 @@ type: text/vnd.tiddlywiki
 
 {{$:/snippets/minilanguageswitcher}}
 
-{{TryImport}}
+<$list filter="[tag<currentTiddler>]">
 
-{{WidgetUsage}}
+!!! <$link><<currentTiddler>></$link>
+
+ {{!!text}}
+
+</$list>

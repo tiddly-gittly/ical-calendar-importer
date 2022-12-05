@@ -1,0 +1,9 @@
+title: Category
+type: text/vnd.tiddlywiki
+tags: Index
+
+We use calendar's name to create a category tiddler, and add it as a tag to all events in this calendar. Calendar's description will be added to this tag tiddler's text field.
+
+!!! Edge cases
+
+If the calendar don't have a name, we will use a random number ID as a fallback, you can rename it later.

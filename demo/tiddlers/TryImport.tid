@@ -1,11 +1,17 @@
 title: TryImport
 type: text/vnd.tiddlywiki
+tags: Index
 
 <$button>
   Import the ExampleShortICal
-  <$action-transformical $icaltitle="ExampleShortICal" />
+  <$action-transformical $icaltitle="ExampleShortICal" importEvent="no" prefix="ExampleShortICal/" fallbackCategoryTitle="MyCalendar" />
+  <$action-transformical $icaltitle="ExampleShortICal" importEvent="yes" prefix="ExampleShortICal/" fallbackCategoryTitle="MyCalendar" />
 </$button>
 
 [[ExampleShortICal]]
 
-<$calendar height="400px" />
+<$list filter="[prefix[ExampleShortICal/]]">
+  <$link><<currentTiddler>></$link>
+</$list>
+
+<$calendar height="400px" initialDate="20081006000000000" />

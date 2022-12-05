@@ -1,0 +1,7 @@
+title: Events
+type: text/vnd.tiddlywiki
+tags: Index
+
+Each event in the calendar will be created as a tiddler. And tiddler will add calendar's name as a tag.
+
+Event's start datetime will become `startDate` field of the tiddler, and end datetime become `endDate`.

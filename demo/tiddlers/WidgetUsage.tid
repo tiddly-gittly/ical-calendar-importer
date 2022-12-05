@@ -1,15 +1,17 @@
 title: WidgetUsage
 type: text/calendar
+tags: Index
 
 !! There are some attributes to control the state and data source of the widget.
 
 | !Attribute | !Description | !Values | !DefaultValues | !Example |
-|$icaltitle|The tiddler title, this tiddler should contains ical file. You can drag-in the `*.ical` file, and change its title when import it. |(string)|``|`$icaltitle="ExampleShortICal"`|
-|prefix|A prefix to the tiddler title, when creating category tiddler and event tiddlers. For example `Cal\` , using `\` in the prefix means put them into a folder in a nodejs setup.|(string or empty)|``|`prefix="GoogleCalendar\"`|
+|$icaltitle|The tiddler title, this tiddler should contains ical file. You can drag-in the `*.ical` file, and change its title when import it. |(string)||`$icaltitle="ExampleShortICal"`|
+|prefix|A prefix to the tiddler title, when creating category tiddler and event tiddlers. For example `Cal\` , using `\` in the prefix means put them into a folder in a nodejs setup.|(string or empty)||`prefix="GoogleCalendar\"`|
 |importEvent|Whether import the event, if true will only import the event, otherwise will only import the category.|`yes` or `true`|`no`|`importEvent="yes"`|
 |eventOffset|When importing events, set the start point of the import. Useful for resuming pervious work.|(number or empty)|`0`|`eventOffset="5"`|
 |eventLimit|When importing events, limit the count in this import, useful for trying out, or importing step by step.|(number or empty)|(length of event)|`eventLimit="999"`|
-|rootTags|Tags added to the category. Separated by space.|(string)|``|`rootTags="$:/CalendarTypes EventTypes"`|
+|rootTags|Tags added to the category. Separated by space.|(string)||`rootTags="$:/CalendarTypes EventTypes"`|
+|fallbackCategoryTitle|When calendar does not have a proper name, you can use this to provide a name for it.|(string)||`fallbackCategoryTitle="MyCalendar"`|
 
 !! Examples
 
