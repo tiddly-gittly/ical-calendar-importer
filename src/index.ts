@@ -203,7 +203,7 @@ class TransformICalWidget extends Widget {
     const tagTiddlerFields: ICalendarCategoryTiddlerFields = {
       title: buildTagTiddlerTitle(title),
       caption: title,
-      text: description,
+      text: description.replace(/\\n|<br\/>/g, '\n\n'),
       tags: this.rootTags ?? [],
       source,
       created: now,
@@ -225,7 +225,7 @@ class TransformICalWidget extends Widget {
         return {
           title: buildEventTitle(SUMMARY, startDate),
           caption: SUMMARY,
-          text: DESCRIPTION ?? '',
+          text: DESCRIPTION?.replace(/\\n|<br\/>/g, '\n\n') ?? '',
           startDate,
           endDate,
           tags: [buildTagTiddlerTitle(title)],
