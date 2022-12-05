@@ -1,13 +1,14 @@
+/* eslint-disable security-node/detect-insecure-randomness */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable typescript-sort-keys/interface */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
-import type { Widget as IWidget, IChangedTiddlers, IParseTreeNode, IWidgetEvent } from 'tiddlywiki';
+import type { Widget as IWidget, IChangedTiddlers, IParseTreeNode, IWidgetEvent, ITiddlerFieldsParam } from 'tiddlywiki';
 import { lines2tree } from 'icalts';
-import { TreeType } from 'icalts/dist/src/types';
 
 const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof IWidget }).widget;
 
 /**
+ * Types from ICal file
  * ```json
  * {
     "DTSTART": "20200429T180000Z",
@@ -26,22 +27,80 @@ const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof
   ```
  */
 export interface ICalEvent {
+  DTSTART?: string;
+  DTEND?: string;
+  DTSTAMP?: string;
+  UID?: string;
+  CREATED?: string;
+  DESCRIPTION?: string;
+  'LAST-MODIFIED'?: string;
+  LOCATION?: string;
+  SEQUENCE?: string;
+  STATUS?: string;
+  SUMMARY?: string;
+  TRANSP?: string;
+}
+export interface ICalMetaData {
+  CALSCALE?: string;
+  METHOD?: string;
+  PRODID?: string;
+  VERSION?: string;
+  VEVENT?: ICalEvent[];
+  VTIMEZONE?: ICalTimeZone[];
+  'X-WR-CALDESC'?: string;
+  'X-WR-CALNAME'?: string;
+  'X-WR-TIMEZONE'?: string;
+}
+
+export interface ICalTimeZone {
+  TZID: string;
+  'X-LIC-LOCATION': string;
+  STANDARD: Standard[];
+}
+
+export interface Standard {
+  TZOFFSETFROM: string;
+  TZOFFSETTO: string;
+  TZNAME: string;
   DTSTART: string;
-  DTEND: string;
-  DTSTAMP: string;
-  UID: string;
-  CREATED: string;
-  DESCRIPTION: string;
-  'LAST-MODIFIED': string;
-  LOCATION: string;
-  SEQUENCE: string;
-  STATUS: string;
-  SUMMARY: string;
-  TRANSP: string;
+}
+
+/**
+ * Type of created tiddlers
+ * Tag tiddler for calendar category
+ */
+interface ICalendarCategoryTiddlerFields extends Partial<ITiddlerFieldsParam> {
+  caption: string;
+  color?: string;
+  tags: string[];
+  text: string;
+  title: string;
+  source?: string;
+}
+interface IEventTiddlerFields extends Partial<ITiddlerFieldsParam> {
+  title: string;
+  caption: string;
+  text: string;
+  tags: string[];
+  startDate: string;
+  endDate: string;
+  created?: string;
+  modified?: string;
+  color?: string;
+}
+
+enum ImportMode {
+  categories = 'categories',
+  events = 'events',
 }
 
 class TransformICalWidget extends Widget {
-  icalTiddlerTitle?: string;
+  icalTiddlerTitleToImport?: string;
+  titlePrefix?: string;
+  eventOffset?: number;
+  eventLimit?: number;
+  rootTags?: string[];
+  mode = ImportMode.categories;
 
   constructor(parseTreeNode: IParseTreeNode, options?: unknown) {
     super(parseTreeNode, options);
@@ -69,14 +128,19 @@ class TransformICalWidget extends Widget {
   }
 
   execute(): void {
-    this.icalTiddlerTitle = this.getAttribute('$icaltitle');
+    this.icalTiddlerTitleToImport = this.getAttribute('$icaltitle');
+    this.titlePrefix = this.getAttribute('prefix');
+    this.eventLimit = this.getAttribute('eventLimit') ? Number(this.getAttribute('eventLimit')) : undefined;
+    this.eventOffset = this.getAttribute('eventOffset') ? Number(this.getAttribute('eventOffset')) : undefined;
+    this.rootTags = (this.getAttribute('rootTags') ?? '').split(' ');
+    this.mode = this.getAttribute('importEvent') === 'yes' ? ImportMode.events : ImportMode.categories;
     // Construct the child widgets
     this.makeChildWidgets();
   }
 
   invokeAction(_triggeringWidget: IWidget, _event: IWidgetEvent): boolean | undefined {
-    if (!this.icalTiddlerTitle) return false;
-    const icalContent = $tw.wiki.getTiddlerText(this.icalTiddlerTitle);
+    if (!this.icalTiddlerTitleToImport) return false;
+    const icalContent = $tw.wiki.getTiddlerText(this.icalTiddlerTitleToImport);
     if (!icalContent) return false;
     /**
      * {VCALENDAR: Array(1)}
@@ -95,9 +159,58 @@ class TransformICalWidget extends Widget {
         X-WR-CALNAME: "运维通勤"
         X-WR-TIMEZONE: "Asia/Shanghai"
      */
-    const calendarInfo = (icalJSON.VCALENDAR as TreeType[])[0];
-    const { PRODID: source, 'X-WR-CALDESC': description, 'X-WR-CALNAME': title, 'X-WR-TIMEZONE': timeZone, VEVENT: events } = calendarInfo;
-    (events as TreeType[] as unknown as ICalEvent[]).forEach((event) => {});
+    const calendarInfo = (icalJSON.VCALENDAR as ICalMetaData[])[0];
+    const {
+      PRODID: source,
+      'X-WR-CALDESC': description = '',
+      'X-WR-CALNAME': title = String(Math.random()).substring(0, 5),
+      'X-WR-TIMEZONE': timeZone,
+      VEVENT: events,
+    } = calendarInfo;
+
+    const titlePrefix = this.titlePrefix ?? '';
+    /**
+     * Calendar name as tag (category) for event
+     * If we have prefix, use it.
+     */
+    const buildTagTiddlerTitle = (categoryName: string) => `${titlePrefix}${categoryName}`;
+    const buildEventTitle = (eventName: string, startDate: string) => `${titlePrefix}${eventName}-${startDate}`;
+    const buildTWDate = (jsDateString: string) => $tw.utils.formatDateString(new Date(jsDateString), '[UTC]YYYY0MM0DD0hh0mm0ssXXX');
+
+    const tagTiddlerFields: ICalendarCategoryTiddlerFields = {
+      title: buildTagTiddlerTitle(title),
+      caption: title,
+      text: description,
+      tags: this.rootTags ?? [],
+      source,
+      // ical don't have color info
+      // color: '',
+    };
+    // update Categories only
+    if (this.mode === ImportMode.categories) {
+      $tw.wiki.addTiddler(tagTiddlerFields);
+      return;
+    }
+    const eventTiddlerFields: IEventTiddlerFields[] = (events ?? [])
+      .map((event): IEventTiddlerFields | undefined => {
+        const { SUMMARY, DTSTART, DTEND, CREATED, DESCRIPTION } = event;
+        if (!SUMMARY || !DTSTART || !DTEND) return undefined;
+        return {
+          title: buildEventTitle(SUMMARY, DTSTART),
+          caption: SUMMARY,
+          text: DESCRIPTION ?? '',
+          startDate: buildTWDate(DTSTART),
+          endDate: buildTWDate(DTEND),
+          tags: [buildTagTiddlerTitle(title)],
+          // ical don't have color info
+          // color: backgroundColor,
+          created: CREATED && $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX'),
+          timeZone,
+        };
+      })
+      .filter((item): item is IEventTiddlerFields => item !== undefined)
+      .slice(this.eventOffset, this.eventLimit);
+    $tw.wiki.addTiddlers(eventTiddlerFields);
     return true; // Action was invoked
   }
 }
