@@ -9,6 +9,16 @@ import iCalDateParser from 'ical-date-parser';
 const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof IWidget }).widget;
 
 /**
+ * {key: 'DTEND', __value__: '20141211', VALUE: 'DATE'}
+ */
+export interface ICalValueObject {
+  key: string;
+  /** this is the actual value */
+  __value__: string;
+  /** this is the value's type, for example, "DATE" */
+  VALUE: string;
+}
+/**
  * Types from ICal file
  * ```json
  * {
@@ -28,8 +38,8 @@ const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof
   ```
  */
 export interface ICalEvent {
-  DTSTART?: string;
-  DTEND?: string;
+  DTSTART?: string | ICalValueObject;
+  DTEND?: string | ICalValueObject;
   DTSTAMP?: string;
   UID?: string;
   CREATED?: string;
@@ -210,10 +220,10 @@ class TransformICalWidget extends Widget {
       .map((event): IEventTiddlerFields | undefined => {
         const { SUMMARY, DTSTART, DTEND, CREATED, DESCRIPTION, 'LAST-MODIFIED': LASTMODIFIED, UID } = event;
         if (!SUMMARY) return undefined;
-        const startDate = DTSTART && buildTWDate(DTSTART);
-        const endDate = DTEND && buildTWDate(DTEND);
+        const startDate = DTSTART === undefined ? undefined : typeof DTSTART === 'string' ? buildTWDate(DTSTART) : buildTWDate(DTSTART.__value__);
+        const endDate = DTEND === undefined ? undefined : typeof DTEND === 'string' ? buildTWDate(DTEND) : buildTWDate(DTEND.__value__);
         return {
-          title: buildEventTitle(SUMMARY, DTSTART),
+          title: buildEventTitle(SUMMARY, startDate),
           caption: SUMMARY,
           text: DESCRIPTION ?? '',
           startDate,

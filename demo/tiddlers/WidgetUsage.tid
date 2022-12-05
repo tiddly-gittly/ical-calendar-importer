@@ -6,7 +6,7 @@ tags: Index
 
 | !Attribute | !Description | !Values | !DefaultValues | !Example |
 |$icaltitle|The tiddler title, this tiddler should contains ical file. You can drag-in the `*.ical` file, and change its title when import it. |(string)||`$icaltitle="ExampleShortICal"`|
-|prefix|A prefix to the tiddler title, when creating category tiddler and event tiddlers. For example `Cal\` , using `\` in the prefix means put them into a folder in a nodejs setup.|(string or empty)||`prefix="GoogleCalendar\"`|
+|prefix|A prefix to the tiddler title, when creating category tiddler and event tiddlers. For example `Cal/` , using `/` in the prefix [[means put them into a folder in a nodejs setup|https://tiddlywiki.com/#Customising%20Tiddler%20File%20Naming]].|(string or empty)||`prefix="GoogleCalendar/"`|
 |importEvent|Whether import the event, if true will only import the event, otherwise will only import the category.|`yes` or `true`|`no`|`importEvent="yes"`|
 |eventOffset|When importing events, set the start point of the import. Useful for resuming pervious work.|(number or empty)|`0`|`eventOffset="5"`|
 |eventLimit|When importing events, limit the count in this import, useful for trying out, or importing step by step.|(number or empty)|(length of event)|`eventLimit="999"`|
@@ -19,12 +19,12 @@ tags: Index
 <!-- Import the category first -->
 <$button>
   Import the Category from ExampleGoogleBirthday
-  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar\" rootTags="EventTypes" />
+  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar/" rootTags="EventTypes" />
 </$button>
 <!-- Import the events -->
 <$button>
   Import the Events from ExampleGoogleBirthday
-  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar\" rootTags="EventTypes" importEvent="yes" />
+  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar/" rootTags="EventTypes" importEvent="yes" />
 </$button>
 ```
 
@@ -33,10 +33,16 @@ tags: Index
 <!-- Import the category first -->
 <$button>
   Import the Category from ExampleGoogleBirthday
-  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar\" rootTags="EventTypes" />
+  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar/" rootTags="EventTypes" />
 </$button>
 <!-- Import the events -->
 <$button>
   Import the Events from ExampleGoogleBirthday
-  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar\" rootTags="EventTypes" importEvent="yes" />
+  <$action-transformical $icaltitle="ExampleGoogleBirthday" prefix="GoogleCalendar/" rootTags="EventTypes" importEvent="yes" />
 </$button>
+
+<$list filter="[prefix[GoogleCalendar/]]">
+  <$link><<currentTiddler>></$link>
+</$list>
+
+<$calendar height="400px" initialDate="20121210000000000" />
