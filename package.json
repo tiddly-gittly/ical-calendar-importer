@@ -28,6 +28,7 @@
     "installType": "typesync"
   },
   "dependencies": {
+    "ical-date-parser": "^4.0.0",
     "icalts": "^0.0.2"
   },
   "devDependencies": {

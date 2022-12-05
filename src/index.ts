@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import type { Widget as IWidget, IChangedTiddlers, IParseTreeNode, IWidgetEvent, ITiddlerFieldsParam } from 'tiddlywiki';
 import { lines2tree } from 'icalts';
+import iCalDateParser from 'ical-date-parser';
 
 const Widget = (require('$:/core/modules/widgets/widget.js') as { widget: typeof IWidget }).widget;
 
@@ -82,8 +83,8 @@ interface IEventTiddlerFields extends Partial<ITiddlerFieldsParam> {
   caption: string;
   text: string;
   tags: string[];
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   created?: string;
   modified?: string;
   color?: string;
@@ -99,6 +100,7 @@ class TransformICalWidget extends Widget {
   titlePrefix?: string;
   eventOffset?: number;
   eventLimit?: number;
+  fallbackCategoryTitle?: string;
   rootTags?: string[];
   mode = ImportMode.categories;
 
@@ -130,10 +132,11 @@ class TransformICalWidget extends Widget {
   execute(): void {
     this.icalTiddlerTitleToImport = this.getAttribute('$icaltitle');
     this.titlePrefix = this.getAttribute('prefix');
+    this.fallbackCategoryTitle = this.getAttribute('fallbackCategoryTitle');
     this.eventLimit = this.getAttribute('eventLimit') ? Number(this.getAttribute('eventLimit')) : undefined;
     this.eventOffset = this.getAttribute('eventOffset') ? Number(this.getAttribute('eventOffset')) : undefined;
-    this.rootTags = (this.getAttribute('rootTags') ?? '').split(' ');
-    this.mode = this.getAttribute('importEvent') === 'yes' ? ImportMode.events : ImportMode.categories;
+    this.rootTags = (this.getAttribute('rootTags') ?? '').split(' ').filter(Boolean);
+    this.mode = this.getAttribute('importEvent') === 'yes' || this.getAttribute('importEvent') === 'true' ? ImportMode.events : ImportMode.categories;
     // Construct the child widgets
     this.makeChildWidgets();
   }
@@ -163,7 +166,7 @@ class TransformICalWidget extends Widget {
     const {
       PRODID: source,
       'X-WR-CALDESC': description = '',
-      'X-WR-CALNAME': title = String(Math.random()).substring(0, 5),
+      'X-WR-CALNAME': title = this.fallbackCategoryTitle,
       'X-WR-TIMEZONE': timeZone,
       VEVENT: events,
     } = calendarInfo;
@@ -174,15 +177,27 @@ class TransformICalWidget extends Widget {
      * If we have prefix, use it.
      */
     const buildTagTiddlerTitle = (categoryName: string) => `${titlePrefix}${categoryName}`;
-    const buildEventTitle = (eventName: string, startDate: string) => `${titlePrefix}${eventName}-${startDate}`;
-    const buildTWDate = (jsDateString: string) => $tw.utils.formatDateString(new Date(jsDateString), '[UTC]YYYY0MM0DD0hh0mm0ssXXX');
+    const buildEventTitle = (eventName: string, startDate?: string) => `${titlePrefix}${eventName}${startDate ? `-${startDate}` : ''}`;
+    const buildTWDate = (jsDateString: string) => {
+      if (jsDateString.length === 8) {
+        // fix 20081006
+        jsDateString += 'T000000Z';
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      return $tw.utils.formatDateString(iCalDateParser(jsDateString), '[UTC]YYYY0MM0DD0hh0mm0ssXXX');
+    };
 
+    if (!title) throw new Error('Calendar title is undefined, set fallbackCategoryTitle="xxx" to fix this');
+
+    const now = $tw.utils.formatDateString(new Date(), '[UTC]YYYY0MM0DD0hh0mm0ssXXX');
     const tagTiddlerFields: ICalendarCategoryTiddlerFields = {
       title: buildTagTiddlerTitle(title),
       caption: title,
       text: description,
       tags: this.rootTags ?? [],
       source,
+      created: now,
+      modified: now,
       // ical don't have color info
       // color: '',
     };
@@ -193,18 +208,20 @@ class TransformICalWidget extends Widget {
     }
     const eventTiddlerFields: IEventTiddlerFields[] = (events ?? [])
       .map((event): IEventTiddlerFields | undefined => {
-        const { SUMMARY, DTSTART, DTEND, CREATED, DESCRIPTION } = event;
-        if (!SUMMARY || !DTSTART || !DTEND) return undefined;
+        const { SUMMARY, DTSTART, DTEND, CREATED, DESCRIPTION, 'LAST-MODIFIED': LASTMODIFIED, UID } = event;
+        if (!SUMMARY) return undefined;
         return {
           title: buildEventTitle(SUMMARY, DTSTART),
           caption: SUMMARY,
           text: DESCRIPTION ?? '',
-          startDate: buildTWDate(DTSTART),
-          endDate: buildTWDate(DTEND),
+          startDate: DTSTART && buildTWDate(DTSTART),
+          endDate: DTEND && buildTWDate(DTEND),
           tags: [buildTagTiddlerTitle(title)],
           // ical don't have color info
           // color: backgroundColor,
-          created: CREATED && $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX'),
+          uid: UID,
+          created: CREATED ? $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : now,
+          modified: LASTMODIFIED ? $tw.utils.formatDateString(new Date(LASTMODIFIED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : now,
           timeZone,
         };
       })
