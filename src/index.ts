@@ -210,18 +210,20 @@ class TransformICalWidget extends Widget {
       .map((event): IEventTiddlerFields | undefined => {
         const { SUMMARY, DTSTART, DTEND, CREATED, DESCRIPTION, 'LAST-MODIFIED': LASTMODIFIED, UID } = event;
         if (!SUMMARY) return undefined;
+        const startDate = DTSTART && buildTWDate(DTSTART);
+        const endDate = DTEND && buildTWDate(DTEND);
         return {
           title: buildEventTitle(SUMMARY, DTSTART),
           caption: SUMMARY,
           text: DESCRIPTION ?? '',
-          startDate: DTSTART && buildTWDate(DTSTART),
-          endDate: DTEND && buildTWDate(DTEND),
+          startDate,
+          endDate,
           tags: [buildTagTiddlerTitle(title)],
           // ical don't have color info
           // color: backgroundColor,
           uid: UID,
-          created: CREATED ? $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : now,
-          modified: LASTMODIFIED ? $tw.utils.formatDateString(new Date(LASTMODIFIED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : now,
+          created: CREATED ? $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : startDate ?? endDate ?? now,
+          modified: LASTMODIFIED ? $tw.utils.formatDateString(new Date(LASTMODIFIED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : endDate ?? startDate ?? now,
           timeZone,
         };
       })
