@@ -1,5 +1,10 @@
 # ICal Calendar Importer for TiddlyWiki5
 
+See [Demo Site](https://github.com/tiddly-gittly/ical-calendar-importer) for details.
+
+This can be used with [tiddly-gittly/tiddlywiki-calendar](https://github.com/tiddly-gittly/tiddlywiki-calendar).
+
+Install it from [the CPL](https://github.com/tiddly-gittly/TiddlyWiki-CPL).
 
 ## During development
 
