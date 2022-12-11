@@ -232,6 +232,11 @@ class TransformICalWidget extends Widget {
           // ical don't have color info
           // color: backgroundColor,
           uid: UID,
+          /**
+           * this `calendarEntry` is used for cascade that ask tiddler only show caption
+           * See $:/plugins/linonetwo/tw-calendar/calendar-widget/tiddlywiki-ui/ViewTemplate/captionCascade
+           */
+          calendarEntry: 'yes',
           created: CREATED ? $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : startDate ?? endDate ?? now,
           modified: LASTMODIFIED ? $tw.utils.formatDateString(new Date(LASTMODIFIED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : endDate ?? startDate ?? now,
           timeZone,
