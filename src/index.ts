@@ -193,6 +193,10 @@ class TransformICalWidget extends Widget {
         // fix 20081006
         jsDateString += 'T000000Z';
       }
+      if (jsDateString.length === 15) {
+        // sometimes will have `DTSTART;TZID=Asia/Shanghai:20201021T120000`, parsed as `20201021T120000`
+        jsDateString += 'Z';
+      }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       return $tw.utils.formatDateString(iCalDateParser(jsDateString), '[UTC]YYYY0MM0DD0hh0mm0ssXXX');
     };
