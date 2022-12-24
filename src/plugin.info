@@ -4,6 +4,6 @@
   "description": "Import *.ical calendar file exported from services like GoogleCalendar into TiddlyWiki.",
   "core-version": ">=5.1.22",
   "plugin-type": "plugin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "list": "readme"
 }
