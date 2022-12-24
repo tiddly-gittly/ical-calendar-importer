@@ -2,18 +2,6 @@ title: $:/plugins/linonetwo/ical-calendar-importer/readme
 creator: LinOnetwo
 type: text/vnd.tiddlywiki
 
-See [[demo site|https://tiddly-gittly.github.io/ical-calendar-importer/]] for usage!
+See [[demo site|https://tiddly-gittly.github.io/ical-calendar-importer/]] for advanced usage!
 
-title of your calendar file dragged in:
-
-<$edit-text tag="input" tiddler="$:/state/TryImportYourCalendar/name"/>
-
-your custom prefix to them, so they are easier to search:
-
-<$edit-text tag="input" tiddler="$:/state/TryImportYourCalendar/prefix"/>
-
-<$button>
-  Import {{$:/state/TryImportYourCalendar/name}}
-  <$action-transformical $icaltitle={{$:/state/TryImportYourCalendar/name}} importEvent="no" prefix={{$:/state/TryImportYourCalendar/prefix}} fallbackCategoryTitle="MyCalendar" />
-  <$action-transformical $icaltitle={{$:/state/TryImportYourCalendar/name}} importEvent="yes" prefix={{$:/state/TryImportYourCalendar/prefix}} fallbackCategoryTitle="MyCalendar" />
-</$button>
+{{$:/plugins/linonetwo/ical-calendar-importer/importer}}

@@ -13,6 +13,14 @@ tags: Index
 |rootTags|Tags added to the category. Separated by space.|(string)||`rootTags="$:/CalendarTypes EventTypes"`|
 |fallbackCategoryTitle|When calendar does not have a proper name, you can use this to provide a name for it.|(string)||`fallbackCategoryTitle="MyCalendar"`|
 
+!! After creation, you can get some variables
+
+```tw5
+<<createTiddler-title>>
+```
+
+This is the [[category tiddler|Category]]'s title. Just like the one in [[action-createtiddler|https://tiddlywiki.com/#ActionCreateTiddlerWidget]].
+
 !! Examples
 
 ```tw5

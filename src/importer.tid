@@ -1,0 +1,38 @@
+title: $:/plugins/linonetwo/ical-calendar-importer/importer
+creator: LinOnetwo
+type: text/vnd.tiddlywiki
+
+!!! title of your calendar file dragged in:
+
+<$edit-text tag="input" tiddler="$:/state/TryImportYourCalendar/name"/>
+
+!!! your custom prefix to them, so they are easier to search.
+
+For example, "Calendar/", this will put them into a folder "Calendar", in nodejs wiki. Leave blank if you don't need a prefix, which is totally ok.
+
+<$edit-text tag="input" tiddler="$:/state/TryImportYourCalendar/prefix"/>
+
+!!! Tag for the category tiddler
+
+ThisTag → CategoryTitle → EachEvent
+
+You may use "Calendar" for this, so your imported calendar will add a "Calendar" tag. Leave blank if you don't need a tag, which is totally ok.
+
+<$edit-text tag="input" tiddler="$:/state/TryImportYourCalendar/tagForCategory"/>
+
+!!! Start import
+
+<$button>
+  Import {{$:/state/TryImportYourCalendar/name}}
+  <$action-transformical $icaltitle={{$:/state/TryImportYourCalendar/name}} importEvent="no" prefix={{$:/state/TryImportYourCalendar/prefix}} fallbackCategoryTitle="MyCalendar">
+    <$let currentTiddler=<<createTiddler-title>>>
+      <$action-listops $tags={{$:/state/TryImportYourCalendar/tagForCategory}} />
+      <$action-setfield $tiddler="$:/state/TryImportYourCalendar/latestImportedCategoryTitle" text=<<createTiddler-title>> />
+    </$let>
+  </$action-transformical>
+  <$action-transformical $icaltitle={{$:/state/TryImportYourCalendar/name}} importEvent="yes" prefix={{$:/state/TryImportYourCalendar/prefix}} fallbackCategoryTitle="MyCalendar" />
+</$button>
+
+<$list filter="[tag{$:/state/TryImportYourCalendar/latestImportedCategoryTitle}]">
+  <$link><<currentTiddler>></$link>
+</$list>

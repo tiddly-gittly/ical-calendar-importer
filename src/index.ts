@@ -211,6 +211,8 @@ class TransformICalWidget extends Widget {
       // ical don't have color info
       // color: '',
     };
+    this.setVariable('createTiddler-title', buildTagTiddlerTitle(title));
+    this.refreshChildren();
     // update Categories only
     if (this.mode === ImportMode.categories) {
       $tw.wiki.addTiddler(tagTiddlerFields);
