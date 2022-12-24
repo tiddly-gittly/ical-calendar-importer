@@ -6,7 +6,6 @@ tags: Index
   Import the ExampleShortICal
   <$action-transformical $icaltitle="ExampleShortICal" importEvent="no" prefix="ExampleShortICal/" fallbackCategoryTitle="MyCalendar">
     <$let currentTiddler=<<createTiddler-title>>>
-      <$log currentTiddler=<<currentTiddler>> createTiddlerTitle=<<createTiddler-title>> />
       <$action-listops $tags={{$:/state/TryImportYourCalendar/tagForCategory}} />
       <$action-setfield $tiddler="$:/state/TryImportYourCalendar/latestImportedCategoryTitle" text=<<createTiddler-title>> />
     </$let>

@@ -224,6 +224,8 @@ class TransformICalWidget extends Widget {
         if (!SUMMARY) return undefined;
         const startDate = DTSTART === undefined ? undefined : typeof DTSTART === 'string' ? buildTWDate(DTSTART) : buildTWDate(DTSTART.__value__);
         const endDate = DTEND === undefined ? undefined : typeof DTEND === 'string' ? buildTWDate(DTEND) : buildTWDate(DTEND.__value__);
+        const created = CREATED ? buildTWDate(CREATED) : startDate ?? endDate ?? now;
+        const modified = LASTMODIFIED ? buildTWDate(LASTMODIFIED) : endDate ?? startDate ?? now;
         return {
           title: buildEventTitle(SUMMARY, startDate),
           caption: SUMMARY,
@@ -239,8 +241,8 @@ class TransformICalWidget extends Widget {
            * See $:/plugins/linonetwo/tw-calendar/calendar-widget/tiddlywiki-ui/ViewTemplate/captionCascade
            */
           calendarEntry: 'yes',
-          created: CREATED ? $tw.utils.formatDateString(new Date(CREATED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : startDate ?? endDate ?? now,
-          modified: LASTMODIFIED ? $tw.utils.formatDateString(new Date(LASTMODIFIED), '[UTC]YYYY0MM0DD0hh0mm0ssXXX') : endDate ?? startDate ?? now,
+          created,
+          modified,
           timeZone,
         };
       })
